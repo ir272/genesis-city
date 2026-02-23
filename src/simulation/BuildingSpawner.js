@@ -164,9 +164,9 @@ export class BuildingSpawner {
     const isDawn = timeOfDay >= 5 && timeOfDay < 7;
 
     let glowIntensity = 0;
-    if (isNight) glowIntensity = 0.6 + Math.sin(Date.now() * 0.003) * 0.1; // flicker
-    else if (isDusk) glowIntensity = ((timeOfDay - 18) / 2) * 0.6;
-    else if (isDawn) glowIntensity = ((7 - timeOfDay) / 2) * 0.4;
+    if (isNight) glowIntensity = 1.2 + Math.sin(Date.now() * 0.003) * 0.2; // bright flicker
+    else if (isDusk) glowIntensity = ((timeOfDay - 18) / 2) * 1.0;
+    else if (isDawn) glowIntensity = ((7 - timeOfDay) / 2) * 0.8;
 
     for (const building of this.registry.getAll()) {
       if (building.mesh) {

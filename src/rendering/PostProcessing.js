@@ -46,11 +46,11 @@ export class PostProcessingStack {
     const isNight = timeOfDay > 20 || timeOfDay < 5;
 
     if (isDawn || isDusk) {
-      this.bloom.intensity = 0.9;
-      this.vignette.uniforms.get('darkness').value = 0.35;
+      this.bloom.intensity = 1.0;
+      this.vignette.uniforms.get('darkness').value = 0.3;
     } else if (isNight) {
-      this.bloom.intensity = 0.6;
-      this.vignette.uniforms.get('darkness').value = 0.5;
+      this.bloom.intensity = 1.2; // Window glow + torches bloom bright
+      this.vignette.uniforms.get('darkness').value = 0.35;
     } else {
       this.bloom.intensity = 0.3;
       this.vignette.uniforms.get('darkness').value = 0.25;

@@ -90,24 +90,24 @@ export class DayNightCycle {
 
     this.sunLight.intensity = sunIntensity;
 
-    // Moon
-    const nightIntensity = sunIntensity < 0.1 ? 0.3 : 0;
+    // Moon — bright enough to see silhouettes
+    const nightIntensity = sunIntensity < 0.1 ? 0.6 : 0;
     this.moonLight.intensity = nightIntensity;
 
     // Ambient: smooth transition day/night
     // Use a smooth value based on sun intensity
     const ambientT = Math.min(1, sunIntensity / 1.0);
     this.ambientLight.color.setHex(lerpColor(AMBIENT_NIGHT, AMBIENT_DAY, ambientT));
-    this.ambientLight.intensity = 0.25 + ambientT * 0.45;
+    this.ambientLight.intensity = 0.35 + ambientT * 0.35;
 
-    // Hemisphere shift
-    this.hemiLight.color.setHex(lerpColor(0x112233, 0x99aacc, ambientT));
-    this.hemiLight.groundColor.setHex(lerpColor(0x111111, 0x554433, ambientT));
-    this.hemiLight.intensity = 0.3 + ambientT * 0.3;
+    // Hemisphere shift — keep some sky glow at night
+    this.hemiLight.color.setHex(lerpColor(0x1a2844, 0x99aacc, ambientT));
+    this.hemiLight.groundColor.setHex(lerpColor(0x1a1510, 0x554433, ambientT));
+    this.hemiLight.intensity = 0.35 + ambientT * 0.25;
 
-    // Fog color shift
-    this.scene.fog.color.setHex(lerpColor(0x0a0f1a, 0x8faaaa, ambientT));
-    this.scene.fog.density = 0.005 + (1 - ambientT) * 0.004;
+    // Fog color shift — dark blue, not pitch black
+    this.scene.fog.color.setHex(lerpColor(0x0f1520, 0x8faaaa, ambientT));
+    this.scene.fog.density = 0.004 + (1 - ambientT) * 0.002;
 
     // Emit time events
     const currentHour = Math.floor(this.timeOfDay);

@@ -34,7 +34,7 @@ export class Overlay {
         else this.displayedPop--;
       }
     }
-    this.popEl.textContent = `${this.displayedPop} souls`;
+    this.popEl.textContent = `${this.displayedPop} ${this.displayedPop === 1 ? 'soul' : 'souls'}`;
 
     this.seasonEl.textContent = SEASON_ICONS[season];
     this.seasonEl.title = SEASON_NAMES[season];
