@@ -30,6 +30,7 @@ class Genesis {
     this.initialized = false;
     this.smokeRefreshTimer = 0;
     this.sceneReady = false;
+    this.timeScale = 1;
   }
 
   boot() {
@@ -50,6 +51,18 @@ class Genesis {
     // New World button
     document.getElementById('new-world-btn').addEventListener('click', () => {
       this._newWorld();
+    });
+
+    // Time controls: Space toggles fast-forward, 1-5 set speed
+    document.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        this.timeScale = this.timeScale === 1 ? 5 : 1;
+        this.overlay.showSpeed(this.timeScale);
+      } else if (e.key >= '1' && e.key <= '5') {
+        this.timeScale = parseInt(e.key);
+        this.overlay.showSpeed(this.timeScale);
+      }
     });
 
     this.sceneReady = true;
@@ -134,8 +147,9 @@ class Genesis {
     if (!this.initialized || !this.running) return;
 
     const now = performance.now();
-    const dt = Math.min((now - this.lastTime) / 1000, 0.1);
+    const rawDt = Math.min((now - this.lastTime) / 1000, 0.1);
     this.lastTime = now;
+    const dt = rawDt * this.timeScale; // Scaled dt for simulation
     this.realTimeElapsed += dt;
 
     // Update pacing
@@ -195,9 +209,9 @@ class Genesis {
     // Terrain season colors
     this.terrain.updateSeasonColors(season);
 
-    // Camera
-    this.cameraController.update(dt);
-    this.cinematicDirector.update(dt);
+    // Camera (use raw dt so camera speed doesn't change with time scale)
+    this.cameraController.update(rawDt);
+    this.cinematicDirector.update(rawDt);
 
     // Scene background tracks sky color
     this.scene.background.copy(this.scene.fog.color);
