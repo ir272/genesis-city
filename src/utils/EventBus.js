@@ -25,6 +25,10 @@ class EventBus {
       for (const cb of cbs) cb(data);
     }
   }
+
+  clear() {
+    this.listeners.clear();
+  }
 }
 
 export const eventBus = new EventBus();

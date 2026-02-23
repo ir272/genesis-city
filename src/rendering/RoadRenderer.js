@@ -18,27 +18,27 @@ export class RoadRenderer {
     this.torchLights = [];
     this.torchInterval = 0;
 
-    // Materials for road levels
+    // Materials for road levels — high contrast against earthy terrain
     this.materials = {
       [ROAD_LEVELS.DIRT]: new THREE.MeshStandardMaterial({
-        color: 0x6a5a3a,
+        color: 0xb09870,
         roughness: 0.95,
         metalness: 0
       }),
       [ROAD_LEVELS.COBBLESTONE]: new THREE.MeshStandardMaterial({
-        color: 0x7a7a6a,
-        roughness: 0.8,
+        color: 0x9a9590,
+        roughness: 0.75,
         metalness: 0.05
       }),
       [ROAD_LEVELS.BOULEVARD]: new THREE.MeshStandardMaterial({
-        color: 0x8a8a7a,
-        roughness: 0.7,
+        color: 0xc0b8a8,
+        roughness: 0.6,
         metalness: 0.1
       })
     };
 
-    // Shared geometry
-    this.roadGeo = new THREE.PlaneGeometry(0.95, 0.95);
+    // Shared geometry — full cell width for seamless tiling
+    this.roadGeo = new THREE.PlaneGeometry(1.0, 1.0);
     this.roadGeo.rotateX(-Math.PI / 2);
 
     // Listen for road events
@@ -52,7 +52,7 @@ export class RoadRenderer {
 
     const mesh = new THREE.Mesh(this.roadGeo, this.materials[level]);
     const wp = this.terrain.getWorldPos(gx, gy);
-    mesh.position.set(wp.x, wp.y + 0.02, wp.z);
+    mesh.position.set(wp.x, wp.y + 0.05, wp.z);
     mesh.receiveShadow = true;
     this.group.add(mesh);
     this.roadMeshes.set(key, mesh);

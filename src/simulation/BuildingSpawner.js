@@ -44,16 +44,24 @@ export class BuildingSpawner {
     // Try to spawn a building
     const spawned = this._trySpawn(gameDays, population);
     if (spawned) {
-      this.spawnCooldown = 3 + Math.random() * 5; // 3-8 seconds between spawns
+      this.spawnCooldown = 1.5 + Math.random() * 3; // 1.5-4.5 seconds between spawns
     } else {
-      this.spawnCooldown = 1;
+      this.spawnCooldown = 0.5;
     }
   }
 
   _trySpawn(gameDays, population) {
-    // Find road-adjacent empty cells
+    // Find empty cells adjacent to roads or market squares
     const candidates = [];
     const roadCells = this.grid.getRoadCells();
+
+    // Also include market cells as access points
+    const cx = Math.floor(GRID_SIZE / 2), cy = Math.floor(GRID_SIZE / 2);
+    for (let dy = -1; dy <= 1; dy++) {
+      for (let dx = -1; dx <= 1; dx++) {
+        roadCells.push({ x: cx + dx, y: cy + dy });
+      }
+    }
 
     for (const { x: rx, y: ry } of roadCells) {
       const neighbors = this.grid.getNeighbors(rx, ry);
@@ -79,8 +87,10 @@ export class BuildingSpawner {
       this.cathedralBuilt = true;
     }
 
-    // Create building
+    // Create building — scale up for visibility
     const mesh = createBuildingGeometry(buildingType, Math.random());
+    const buildingScale = 1.8;
+    mesh.scale.set(buildingScale, buildingScale, buildingScale);
     const worldPos = this.terrain.getWorldPos(chosen.x, chosen.y);
 
     const targetY = worldPos.y;

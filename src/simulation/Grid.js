@@ -87,7 +87,9 @@ export class Grid {
   }
 
   isAdjacentToRoad(x, y) {
-    return this.getNeighbors(x, y).some(n => n.cell.type === CELL_TYPES.ROAD);
+    return this.getNeighbors(x, y).some(n =>
+      n.cell.type === CELL_TYPES.ROAD || n.cell.type === CELL_TYPES.MARKET
+    );
   }
 
   findNearestOfType(x, y, type, maxRadius = 50) {

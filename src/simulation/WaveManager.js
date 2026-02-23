@@ -44,7 +44,7 @@ export class WaveManager {
   }
 
   canSpawnCitizens() {
-    return this.phase === 'expansion' || this.phase === 'maturity';
+    return this.phase === 'earlyRoads' || this.phase === 'expansion' || this.phase === 'maturity';
   }
 
   getRoadBranchInterval() {

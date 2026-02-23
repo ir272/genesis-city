@@ -8,8 +8,8 @@ export class CameraController {
 
     // Orbit parameters
     this.target = new THREE.Vector3(0, 0, 0);
-    this.distance = 60;
-    this.minDistance = 10;
+    this.distance = 35;
+    this.minDistance = 5;
     this.maxDistance = 120;
     this.phi = Math.PI / 4; // vertical angle (from top)
     this.theta = 0; // horizontal angle

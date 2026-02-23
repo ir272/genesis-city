@@ -116,7 +116,7 @@ class Genesis {
 
     // Reset camera
     this.cameraController.target.set(0, 0, 0);
-    this.cameraController.distance = 60;
+    this.cameraController.distance = 35;
     this.cameraController.autoRotate = true;
 
     // Hide loading screen
@@ -235,8 +235,9 @@ class Genesis {
       this.scene.remove(this.scene.children[0]);
     }
 
-    // Clear caches
+    // Clear caches and event listeners
     clearPathCache();
+    eventBus.clear();
 
     // New seed, reset time
     this.seed = Math.random() * 10000;
@@ -256,4 +257,5 @@ class Genesis {
 
 // Boot
 const genesis = new Genesis();
+window.__genesis = genesis; // Debug access
 genesis.boot();

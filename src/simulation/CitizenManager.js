@@ -45,12 +45,12 @@ export class CitizenManager {
       headPos[i] += 0.2;
     }
 
-    // Simple approach: use a capsule-like shape
-    const capsuleGeo = new THREE.CapsuleGeometry(0.06, 0.2, 3, 5);
+    // Visible citizen figure
+    const capsuleGeo = new THREE.CapsuleGeometry(0.1, 0.35, 3, 5);
 
     const mat = new THREE.MeshStandardMaterial({
-      color: 0x2a1a0a,
-      roughness: 0.9
+      color: 0x3a2515,
+      roughness: 0.85
     });
 
     this.instancedMesh = new THREE.InstancedMesh(capsuleGeo, mat, this.maxCitizens);
@@ -78,7 +78,7 @@ export class CitizenManager {
     // Try to spawn new citizens from residential buildings
     if (this.spawnCooldown <= 0 && this.citizens.length < this.maxCitizens) {
       this._trySpawnCitizen(gameDays);
-      this.spawnCooldown = 5 + Math.random() * 10;
+      this.spawnCooldown = 3 + Math.random() * 5;
     }
 
     // Update each citizen

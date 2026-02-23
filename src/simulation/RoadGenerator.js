@@ -20,27 +20,33 @@ export class RoadGenerator {
     this.attractors = [];
     if (gatePos) this.attractors.push(gatePos);
 
-    // Add river bank points as attractors
+    // Add 2 river bank points as attractors
     if (riverPoints && riverPoints.length > 0) {
-      // Sample a few river-adjacent points
-      for (let i = 0; i < riverPoints.length; i += 40) {
-        const rp = riverPoints[i];
-        // Find adjacent land cell
-        for (const [dx, dy] of [[1,0],[-1,0],[0,1],[0,-1]]) {
+      const step = Math.floor(riverPoints.length / 3);
+      for (let i = step; i < riverPoints.length; i += step) {
+        const rp = riverPoints[Math.min(i, riverPoints.length - 1)];
+        for (const [dx, dy] of [[1,0],[-1,0],[0,1],[0,-1],[2,0],[-2,0]]) {
           const nx = rp.x + dx, ny = rp.y + dy;
           if (this.grid.inBounds(nx, ny) && this.grid.getCell(nx, ny).type === CELL_TYPES.EMPTY) {
             this.attractors.push({ x: nx, y: ny });
             break;
           }
         }
+        if (this.attractors.length >= 4) break;
       }
     }
 
-    // Forest edges as attractors
+    // Forest edges as attractors (verify they're reachable)
     if (forestClusters) {
       for (const fc of forestClusters) {
-        this.attractors.push({ x: fc.x + fc.radius, y: fc.y });
-        this.attractors.push({ x: fc.x, y: fc.y + fc.radius });
+        // Find an empty cell near the forest edge
+        for (let r = fc.radius; r < fc.radius + 5; r++) {
+          const tx = fc.x + r, ty = fc.y;
+          if (this.grid.inBounds(tx, ty) && this.grid.getCell(tx, ty).type === CELL_TYPES.EMPTY) {
+            this.attractors.push({ x: tx, y: ty });
+            break;
+          }
+        }
       }
     }
 
