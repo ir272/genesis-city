@@ -19,6 +19,7 @@ import { Tooltip } from './ui/Tooltip.js';
 import { TimeLapse } from './ui/TimeLapse.js';
 import { GRID_SIZE } from './utils/constants.js';
 import { eventBus } from './utils/EventBus.js';
+import { clearPathCache } from './utils/AStar.js';
 
 class Genesis {
   constructor() {
@@ -28,16 +29,35 @@ class Genesis {
     this.running = true;
     this.initialized = false;
     this.smokeRefreshTimer = 0;
+    this.sceneReady = false;
   }
 
-  async init() {
-    // Scene
+  boot() {
+    // Create renderer/scene once
     const { scene, camera, renderer, postProcessing } = createScene();
     this.scene = scene;
     this.camera = camera;
     this.renderer = renderer;
     this.postProcessing = postProcessing;
 
+    // Camera controller — persistent across worlds
+    this.cameraController = new CameraController(this.camera, this.renderer.domElement);
+
+    // UI — persistent
+    this.overlay = new Overlay();
+    this.timeLapse = new TimeLapse(this.renderer);
+
+    // New World button
+    document.getElementById('new-world-btn').addEventListener('click', () => {
+      this._newWorld();
+    });
+
+    this.sceneReady = true;
+    this._initWorld();
+    this._loop();
+  }
+
+  _initWorld() {
     // Core systems
     this.grid = new Grid();
     this.registry = new BuildingRegistry();
@@ -87,20 +107,17 @@ class Genesis {
     // Water renderer
     this.waterRenderer = new WaterRenderer(this.scene, this.terrain.waterMesh);
 
-    // Camera
-    this.cameraController = new CameraController(this.camera, this.renderer.domElement);
+    // Cinematic director
     this.cinematicDirector = new CinematicDirector(this.cameraController, this.registry, this.terrain);
 
-    // UI
-    this.overlay = new Overlay();
+    // Tooltip (needs per-world grid/registry)
     this.tooltip = new Tooltip(this.camera, this.grid, this.registry, this.terrain);
     this.tooltip.setGroundMesh(this.terrain.terrainMesh);
-    this.timeLapse = new TimeLapse(this.renderer);
 
-    // New World button
-    document.getElementById('new-world-btn').addEventListener('click', () => {
-      this._newWorld();
-    });
+    // Reset camera
+    this.cameraController.target.set(0, 0, 0);
+    this.cameraController.distance = 60;
+    this.cameraController.autoRotate = true;
 
     // Hide loading screen
     const loading = document.getElementById('loading-screen');
@@ -109,21 +126,17 @@ class Genesis {
 
     this.initialized = true;
     this.lastTime = performance.now();
-
-    // Start game loop
-    this._loop();
   }
 
   _loop() {
-    if (!this.running) return;
     requestAnimationFrame(() => this._loop());
 
+    if (!this.initialized || !this.running) return;
+
     const now = performance.now();
-    const dt = Math.min((now - this.lastTime) / 1000, 0.1); // cap delta
+    const dt = Math.min((now - this.lastTime) / 1000, 0.1);
     this.lastTime = now;
     this.realTimeElapsed += dt;
-
-    if (!this.initialized) return;
 
     // Update pacing
     this.waveManager.update(this.realTimeElapsed);
@@ -201,28 +214,46 @@ class Genesis {
   }
 
   _newWorld() {
-    // Clean up and restart
-    this.running = false;
     this.initialized = false;
 
-    // Remove old scene children except camera-related
+    // Dispose scene objects
+    this.scene.traverse(child => {
+      if (child.isMesh || child.isInstancedMesh) {
+        child.geometry?.dispose();
+        if (Array.isArray(child.material)) {
+          child.material.forEach(m => m.dispose());
+        } else {
+          child.material?.dispose();
+        }
+      }
+      if (child.isLight) {
+        // Don't dispose lights — they'll be recreated
+      }
+    });
+
     while (this.scene.children.length > 0) {
-      const child = this.scene.children[0];
-      this.scene.remove(child);
+      this.scene.remove(this.scene.children[0]);
     }
 
-    // New seed
+    // Clear caches
+    clearPathCache();
+
+    // New seed, reset time
     this.seed = Math.random() * 10000;
     this.realTimeElapsed = 0;
+    this.smokeRefreshTimer = 0;
 
-    // Re-init
+    // Show loading briefly
+    const loading = document.getElementById('loading-screen');
+    loading.style.display = 'flex';
+    loading.style.opacity = '1';
+
     setTimeout(() => {
-      this.running = true;
-      this.init();
-    }, 100);
+      this._initWorld();
+    }, 200);
   }
 }
 
 // Boot
 const genesis = new Genesis();
-genesis.init().catch(console.error);
+genesis.boot();

@@ -189,22 +189,46 @@ export class Terrain {
   }
 
   _buildWaterPlane() {
-    // Simple water plane at the river level
-    const waterGeo = new THREE.PlaneGeometry(GRID_SIZE, GRID_SIZE);
+    // Build water mesh only where there are water cells
+    if (this.riverPoints.length === 0) {
+      this.waterMesh = null;
+      return;
+    }
+
+    // Find bounding box of river
+    let minX = GRID_SIZE, maxX = 0, minY = GRID_SIZE, maxY = 0;
+    for (const rp of this.riverPoints) {
+      minX = Math.min(minX, rp.x);
+      maxX = Math.max(maxX, rp.x);
+      minY = Math.min(minY, rp.y);
+      maxY = Math.max(maxY, rp.y);
+    }
+
+    // Add margin
+    minX = Math.max(0, minX - 2);
+    maxX = Math.min(GRID_SIZE - 1, maxX + 2);
+    minY = Math.max(0, minY - 2);
+    maxY = Math.min(GRID_SIZE - 1, maxY + 2);
+
+    const w = maxX - minX + 1;
+    const h = maxY - minY + 1;
+
+    const waterGeo = new THREE.PlaneGeometry(w, h);
     waterGeo.rotateX(-Math.PI / 2);
     const waterMat = new THREE.MeshStandardMaterial({
-      color: 0x1a3040,
+      color: 0x1a3a50,
       transparent: true,
-      opacity: 0.7,
+      opacity: 0.75,
       roughness: 0.1,
-      metalness: 0.6,
+      metalness: 0.5,
     });
+
     this.waterMesh = new THREE.Mesh(waterGeo, waterMat);
-    this.waterMesh.position.y = -0.2;
+    const cx = (minX + maxX) / 2 - GRID_SIZE / 2;
+    const cy = (minY + maxY) / 2 - GRID_SIZE / 2;
+    this.waterMesh.position.set(cx, -0.15, cy);
     this.waterMesh.receiveShadow = true;
     this.waterMesh.name = 'water';
-    // Only render where there's water — clip using a smaller plane positioned at river
-    // For simplicity, we'll keep it large but very transparent, the terrain dips into it at the river
     this.group.add(this.waterMesh);
   }
 
