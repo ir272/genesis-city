@@ -174,11 +174,11 @@ class Genesis {
     if (this.waveManager.canSpawnCitizens()) {
       this.citizenManager.update(dt, timeOfDay, gameDays);
 
-      // Entrepreneur system
+      // Entrepreneur system — citizens found new buildings
       if (Math.random() < 0.001) {
         const spot = this.citizenManager.tryEntrepreneurAction(gameDays);
         if (spot) {
-          eventBus.emit('entrepreneurBuild', spot);
+          this.buildingSpawner.spawnAtSpot(spot, gameDays, this.citizenManager.getPopulation());
         }
       }
     }

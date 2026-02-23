@@ -157,6 +157,38 @@ export class BuildingSpawner {
     return this.grid.countNearbyType(x, y, CELL_TYPES.BUILDING, radius) > 0;
   }
 
+  spawnAtSpot(spot, gameDays, population) {
+    const cell = this.grid.getCell(spot.x, spot.y);
+    if (cell.type !== CELL_TYPES.EMPTY) return;
+
+    const zone = this.grid.getZone(spot.x, spot.y);
+    const buildingType = this._pickBuildingType(zone, population);
+    if (!buildingType) return;
+
+    const mesh = createBuildingGeometry(buildingType, Math.random());
+    mesh.scale.set(1.8, 1.8, 1.8);
+    const worldPos = this.terrain.getWorldPos(spot.x, spot.y);
+
+    mesh.position.set(worldPos.x, worldPos.y - 2, worldPos.z);
+    mesh.rotation.y = Math.floor(Math.random() * 4) * (Math.PI / 2);
+    this.buildingsGroup.add(mesh);
+
+    const id = this.registry.register({
+      gridX: spot.x, gridY: spot.y, type: buildingType, mesh, builtDay: gameDays
+    });
+
+    const building = this.registry.get(id);
+    building.startY = worldPos.y - 2;
+    building.targetY = worldPos.y;
+    this.constructingBuildings.push(building);
+
+    this.grid.setCell(spot.x, spot.y, {
+      type: CELL_TYPES.BUILDING, buildingType, buildingId: id
+    });
+
+    eventBus.emit('buildingSpawned', { x: spot.x, y: spot.y, type: buildingType, id });
+  }
+
   updateWindowGlow(timeOfDay) {
     // timeOfDay: 0-24 hours
     const isNight = timeOfDay < 5 || timeOfDay > 20;
