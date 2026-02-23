@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GENESIS</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0a0a; }
+    canvas { display: block; }
+    @font-face {
+      font-family: 'Genesis';
+      src: local('Garamond'), local('Georgia'), local('Times New Roman');
+    }
+    #overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      z-index: 10;
+      font-family: 'Genesis', Georgia, 'Times New Roman', serif;
+    }
+    #date-display {
+      position: absolute;
+      bottom: 28px; left: 32px;
+      color: rgba(220, 200, 170, 0.7);
+      font-size: 15px;
+      letter-spacing: 2px;
+      text-shadow: 0 0 10px rgba(0,0,0,0.8);
+    }
+    #population-display {
+      position: absolute;
+      bottom: 28px; right: 32px;
+      color: rgba(220, 200, 170, 0.7);
+      font-size: 15px;
+      letter-spacing: 2px;
+      text-shadow: 0 0 10px rgba(0,0,0,0.8);
+    }
+    #season-display {
+      position: absolute;
+      top: 28px; right: 32px;
+      color: rgba(220, 200, 170, 0.5);
+      font-size: 20px;
+    }
+    #tooltip {
+      position: absolute;
+      display: none;
+      background: rgba(10, 8, 5, 0.85);
+      border: 1px solid rgba(180, 150, 100, 0.3);
+      color: rgba(220, 200, 170, 0.9);
+      padding: 8px 14px;
+      font-size: 13px;
+      letter-spacing: 1px;
+      pointer-events: none;
+      backdrop-filter: blur(4px);
+      max-width: 280px;
+    }
+    #new-world-btn {
+      position: absolute;
+      top: 28px; left: 32px;
+      pointer-events: all;
+      background: none;
+      border: 1px solid rgba(180, 150, 100, 0.2);
+      color: rgba(220, 200, 170, 0.5);
+      font-family: 'Genesis', Georgia, serif;
+      font-size: 12px;
+      letter-spacing: 3px;
+      padding: 6px 16px;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: all 0.3s;
+    }
+    #new-world-btn:hover {
+      border-color: rgba(180, 150, 100, 0.5);
+      color: rgba(220, 200, 170, 0.8);
+    }
+    #timelapse-bar {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 4px;
+      background: rgba(180, 150, 100, 0.1);
+      opacity: 0;
+      transition: opacity 0.3s, height 0.3s;
+      pointer-events: all;
+      cursor: pointer;
+    }
+    #timelapse-bar:hover {
+      opacity: 1;
+      height: 8px;
+    }
+    #timelapse-progress {
+      height: 100%;
+      background: rgba(220, 180, 100, 0.4);
+      width: 100%;
+      transition: width 0.1s;
+    }
+    #loading-screen {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #0a0a0a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      z-index: 100;
+      transition: opacity 1.5s;
+    }
+    #loading-screen h1 {
+      font-family: 'Genesis', Georgia, serif;
+      color: rgba(220, 200, 170, 0.6);
+      font-size: 48px;
+      letter-spacing: 20px;
+      font-weight: 300;
+      margin-bottom: 20px;
+    }
+    #loading-screen p {
+      font-family: 'Genesis', Georgia, serif;
+      color: rgba(220, 200, 170, 0.3);
+      font-size: 14px;
+      letter-spacing: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div id="loading-screen">
+    <h1>GENESIS</h1>
+    <p>preparing the land</p>
+  </div>
+  <div id="overlay">
+    <button id="new-world-btn">New World</button>
+    <div id="season-display"></div>
+    <div id="date-display"></div>
+    <div id="population-display"></div>
+    <div id="tooltip"></div>
+    <div id="timelapse-bar">
+      <div id="timelapse-progress"></div>
+    </div>
+  </div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
