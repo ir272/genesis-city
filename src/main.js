@@ -186,6 +186,9 @@ class Genesis {
     this.cameraController.update(dt);
     this.cinematicDirector.update(dt);
 
+    // Scene background tracks sky color
+    this.scene.background.copy(this.scene.fog.color);
+
     // Post-processing time adjustments
     this.postProcessing.updateTimeOfDay(timeOfDay);
 

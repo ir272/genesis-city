@@ -25,6 +25,7 @@ export class Terrain {
     this._buildTerrainMesh();
     this._buildWaterPlane();
     this._buildTreeMeshes();
+    this._buildMarketSquareMesh();
     return this.group;
   }
 
@@ -268,6 +269,42 @@ export class Terrain {
       y: this.grid.getElevation(gridX, gridY),
       z: gridY - GRID_SIZE / 2
     };
+  }
+
+  _buildMarketSquareMesh() {
+    // Stone plaza at city center
+    const cx = Math.floor(GRID_SIZE / 2);
+    const cy = Math.floor(GRID_SIZE / 2);
+    const elev = this.grid.getElevation(cx, cy);
+
+    const plazaGeo = new THREE.PlaneGeometry(3, 3);
+    plazaGeo.rotateX(-Math.PI / 2);
+    const plazaMat = new THREE.MeshStandardMaterial({
+      color: 0x7a7a6a,
+      roughness: 0.85,
+      metalness: 0.05
+    });
+    const plaza = new THREE.Mesh(plazaGeo, plazaMat);
+    plaza.position.set(0, elev + 0.03, 0);
+    plaza.receiveShadow = true;
+    this.group.add(plaza);
+
+    // Market cross / well at center
+    const postGeo = new THREE.CylinderGeometry(0.06, 0.06, 0.8, 6);
+    const postMat = new THREE.MeshStandardMaterial({ color: 0x5a5a5a, roughness: 0.8 });
+    const post = new THREE.Mesh(postGeo, postMat);
+    post.position.set(0, elev + 0.4, 0);
+    post.castShadow = true;
+    this.group.add(post);
+
+    // Cross top
+    const crossH = new THREE.Mesh(
+      new THREE.BoxGeometry(0.3, 0.04, 0.04),
+      postMat
+    );
+    crossH.position.set(0, elev + 0.85, 0);
+    crossH.castShadow = true;
+    this.group.add(crossH);
   }
 
   updateSeasonColors(season) {

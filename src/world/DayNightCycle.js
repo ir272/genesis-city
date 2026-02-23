@@ -7,12 +7,12 @@ import { eventBus } from '../utils/EventBus.js';
 export class DayNightCycle {
   constructor(scene) {
     this.scene = scene;
-    this.timeOfDay = 8; // Start at morning
+    this.timeOfDay = 10; // Start at morning
     this.gameDays = 0;
-    this.totalGameTime = 0;
+    this.totalGameTime = 10; // Start at 10am so terrain is fully lit
 
     // Sun
-    this.sunLight = new THREE.DirectionalLight(SUN_COLOR, 1.2);
+    this.sunLight = new THREE.DirectionalLight(SUN_COLOR, 1.5);
     this.sunLight.castShadow = true;
     this.sunLight.shadow.mapSize.width = 2048;
     this.sunLight.shadow.mapSize.height = 2048;
@@ -31,16 +31,16 @@ export class DayNightCycle {
     this.moonLight.castShadow = false;
     scene.add(this.moonLight);
 
-    // Ambient
-    this.ambientLight = new THREE.AmbientLight(AMBIENT_DAY, 0.4);
+    // Ambient — brighter base
+    this.ambientLight = new THREE.AmbientLight(AMBIENT_DAY, 0.6);
     scene.add(this.ambientLight);
 
     // Hemisphere light for sky color
-    this.hemiLight = new THREE.HemisphereLight(0x8899bb, 0x443322, 0.3);
+    this.hemiLight = new THREE.HemisphereLight(0x8899bb, 0x443322, 0.5);
     scene.add(this.hemiLight);
 
-    // Fog
-    this.scene.fog = new THREE.FogExp2(0x8fa5a5, 0.008);
+    // Fog — lighter
+    this.scene.fog = new THREE.FogExp2(0x8fa5a5, 0.006);
 
     this.lastHour = -1;
   }
@@ -53,54 +53,61 @@ export class DayNightCycle {
     this.gameDays = Math.floor(this.totalGameTime / GAME_HOURS_PER_DAY);
 
     // Sun position (arc across sky)
-    const sunAngle = ((this.timeOfDay - 6) / 12) * Math.PI; // 6am = 0, 6pm = PI
+    // Map 6am-18pm to 0-PI for the sun arc
+    const sunAngle = ((this.timeOfDay - 6) / 12) * Math.PI;
     const sunHeight = Math.sin(sunAngle);
-    const sunX = Math.cos(sunAngle) * 80;
-    const sunY = sunHeight * 60;
-    const sunZ = Math.sin(sunAngle * 0.5) * 30;
+    const sunHoriz = Math.cos(sunAngle);
+    const sunX = sunHoriz * 80;
+    const sunY = sunHeight * 80;
+    const sunZ = sunHoriz * 20;
 
     this.sunLight.position.set(sunX, Math.max(sunY, -10), sunZ);
     this.sunLight.target.position.set(0, 0, 0);
 
     // Moon (opposite)
-    this.moonLight.position.set(-sunX, Math.max(-sunY, 5), -sunZ);
+    this.moonLight.position.set(-sunX, Math.max(-sunY, 10), -sunZ);
 
-    // Intensity based on time of day
-    const dayIntensity = Math.max(0, sunHeight);
-    const nightIntensity = Math.max(0, -sunHeight) * 0.3;
-
-    this.sunLight.intensity = dayIntensity * 1.2;
-    this.moonLight.intensity = nightIntensity;
-
-    // Color temperature shifts
+    // Smooth intensity curve that ramps up at dawn, peaks midday, ramps down at dusk
+    let sunIntensity = 0;
     if (this.timeOfDay >= 5 && this.timeOfDay < 7) {
-      // Dawn: warm amber
+      // Dawn ramp: 0 -> 1.5
       const t = (this.timeOfDay - 5) / 2;
+      sunIntensity = t * 1.5;
       this.sunLight.color.setHex(lerpColor(0xff8833, SUN_COLOR, t));
-      this.sunLight.intensity = t * 1.0;
+    } else if (this.timeOfDay >= 7 && this.timeOfDay < 18) {
+      // Full day
+      sunIntensity = 1.5;
+      this.sunLight.color.setHex(SUN_COLOR);
     } else if (this.timeOfDay >= 18 && this.timeOfDay < 20) {
-      // Dusk: deep orange
+      // Dusk ramp: 1.5 -> 0
       const t = (this.timeOfDay - 18) / 2;
+      sunIntensity = (1 - t) * 1.5;
       this.sunLight.color.setHex(lerpColor(SUN_COLOR, 0xff5500, t));
-      this.sunLight.intensity = (1 - t) * 1.0;
-    } else if (this.timeOfDay >= 20 || this.timeOfDay < 5) {
+    } else {
       // Night
-      this.sunLight.intensity = 0;
+      sunIntensity = 0;
     }
 
-    // Ambient color shift
-    const ambientT = Math.max(0, Math.min(1, dayIntensity));
+    this.sunLight.intensity = sunIntensity;
+
+    // Moon
+    const nightIntensity = sunIntensity < 0.1 ? 0.3 : 0;
+    this.moonLight.intensity = nightIntensity;
+
+    // Ambient: smooth transition day/night
+    // Use a smooth value based on sun intensity
+    const ambientT = Math.min(1, sunIntensity / 1.0);
     this.ambientLight.color.setHex(lerpColor(AMBIENT_NIGHT, AMBIENT_DAY, ambientT));
-    this.ambientLight.intensity = 0.2 + ambientT * 0.3;
+    this.ambientLight.intensity = 0.25 + ambientT * 0.45;
 
     // Hemisphere shift
-    const skyT = ambientT;
-    this.hemiLight.color.setHex(lerpColor(0x111122, 0x8899bb, skyT));
-    this.hemiLight.groundColor.setHex(lerpColor(0x111111, 0x443322, skyT));
+    this.hemiLight.color.setHex(lerpColor(0x112233, 0x99aacc, ambientT));
+    this.hemiLight.groundColor.setHex(lerpColor(0x111111, 0x554433, ambientT));
+    this.hemiLight.intensity = 0.3 + ambientT * 0.3;
 
     // Fog color shift
-    this.scene.fog.color.setHex(lerpColor(0x0a0f1a, 0x8fa5a5, ambientT));
-    this.scene.fog.density = 0.008 + (1 - ambientT) * 0.005;
+    this.scene.fog.color.setHex(lerpColor(0x0a0f1a, 0x8faaaa, ambientT));
+    this.scene.fog.density = 0.005 + (1 - ambientT) * 0.004;
 
     // Emit time events
     const currentHour = Math.floor(this.timeOfDay);

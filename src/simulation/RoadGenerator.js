@@ -12,7 +12,7 @@ export class RoadGenerator {
     this.pendingRoads = [];
     this.roadMeshes = new Map();
     this.lastBranchTime = 0;
-    this.branchInterval = 30; // seconds between branch attempts
+    this.branchInterval = 15; // seconds between branch attempts
   }
 
   init(marketPos, gatePos, forestClusters, riverPoints) {
@@ -73,8 +73,8 @@ export class RoadGenerator {
         road.placed = 0;
       }
 
-      // Place cells gradually — speed depends on phase
-      const speed = road.type === 'primary' ? 4 : 2; // cells per second
+      // Place cells gradually — primary roads grow faster
+      const speed = road.type === 'primary' ? 8 : 4; // cells per second
       road.progress += dt * speed;
 
       while (road.placed < road.path.length && road.progress >= 1) {
@@ -100,7 +100,7 @@ export class RoadGenerator {
     }
 
     // Branch secondary roads periodically
-    if (realTimeElapsed - this.lastBranchTime > this.branchInterval && realTimeElapsed > 60) {
+    if (realTimeElapsed - this.lastBranchTime > this.branchInterval && realTimeElapsed > 10) {
       this.lastBranchTime = realTimeElapsed;
       this._tryBranchRoad();
     }

@@ -23,40 +23,37 @@ export class WaveManager {
     return this.phase;
   }
 
-  // How fast roads should grow (cells per second)
   getRoadGrowthRate() {
     switch (this.phase) {
-      case 'seed': return 0;
-      case 'earlyRoads': return 3;
-      case 'expansion': return 2;
-      case 'maturity': return 1;
+      case 'seed': return 6;        // Roads start growing immediately
+      case 'earlyRoads': return 5;
+      case 'expansion': return 3;
+      case 'maturity': return 1.5;
       default: return 1;
     }
   }
 
-  // How often buildings should spawn (seconds between spawns)
   getBuildingSpawnInterval() {
     switch (this.phase) {
       case 'seed': return Infinity;
-      case 'earlyRoads': return 8;
-      case 'expansion': return 4;
-      case 'maturity': return 6;
-      default: return 6;
+      case 'earlyRoads': return 5;   // Buildings start earlier
+      case 'expansion': return 3;
+      case 'maturity': return 5;
+      default: return 5;
     }
   }
 
-  // Whether citizens should start spawning
   canSpawnCitizens() {
     return this.phase === 'expansion' || this.phase === 'maturity';
   }
 
-  // Road branching interval
   getRoadBranchInterval() {
     switch (this.phase) {
-      case 'earlyRoads': return 45;
-      case 'expansion': return 25;
-      case 'maturity': return 40;
-      default: return 60;
+      case 'seed': return 10;
+      case 'earlyRoads': return 20;
+      case 'expansion': return 15;
+      case 'maturity': return 30;
+      default: return 30;
     }
   }
 }

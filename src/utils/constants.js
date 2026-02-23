@@ -62,9 +62,9 @@ export const NIGHT_START = 20;
 export const NIGHT_END = 5;
 
 // Growth pacing (real seconds)
-export const SEED_PHASE_END = 30;
-export const EARLY_ROADS_END = 120;
-export const EXPANSION_PHASE_END = 480;
+export const SEED_PHASE_END = 5;        // Seeds placed immediately, roads start fast
+export const EARLY_ROADS_END = 60;      // Primary roads form in first minute
+export const EXPANSION_PHASE_END = 300; // Buildings + secondary roads 1-5 min
 export const MATURITY_PHASE_END = 1440;
 
 // Simulation
