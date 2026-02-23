@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import { eventBus } from '../utils/EventBus.js';
 
 export class CinematicDirector {
@@ -45,7 +46,7 @@ export class CinematicDirector {
   _flyToEvent(gx, gy) {
     if (this.camera.isDragging) return;
     const wp = this.terrain.getWorldPos(gx, gy);
-    const target = { x: wp.x, y: wp.y, z: wp.z };
+    const target = new THREE.Vector3(wp.x, wp.y, wp.z);
     this.camera.flyToBuilding(target);
   }
 
